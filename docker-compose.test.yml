@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  backend:
+    container_name: mealwise_backend_test
+  build:
+    target: builder
+  command: npm run test
+  restart: 'no'
+
+  db:
+    container_name: mealwise_db_test
+    volumes:
+      - db-data-test:/var/lib/postgresql/data
+    restart: 'no'
+
+volumes:
+  db-data-test:

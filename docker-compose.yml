@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mealwise_backend_prod
+    container_name: mealwise_backend_prod
+    environment:
+      DB_HOST: db
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_PORT: ${DB_PORT}
+      NODE_ENV: ${NODE_ENV}
+      DB_DIALECT: ${DB_DIALECT}
+    depends_on:
+      - db
+    restart: always
+    networks:
+      - mealwise_network
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - mealwise_network
+
+volumes:
+  db-data:
+
+networks:
+  mealwise_network:
+    external: true

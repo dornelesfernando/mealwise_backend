@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      target: builder
+    container_name: mealwise_backend_dev
+    env_file:
+      - ./.env.development
+    ports:
+      - '${BACKEND_PORT}:5000'
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run dev
+    restart: 'no'
+
+  db:
+    container_name: mealwise_db_dev
+    ports:
+      - '5432:5432'

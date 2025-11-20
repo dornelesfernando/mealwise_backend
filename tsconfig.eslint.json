@@ -1,0 +1,4 @@
+{
+  "extends": "./tsconfig.json", // Herda sua configuração principal
+  "include": ["src/**/*.ts"]
+}
