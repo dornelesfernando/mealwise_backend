@@ -16,28 +16,28 @@ export const createUserSchema = z.object({
       .min(1, 'A senha é obrigatória.')
       .min(6, 'A senha deve ter no mínimo 6 caracteres.'),
 
-    hiring_date: z.coerce
-      .date()
-      .refine((date) => !isNaN(date.getTime()), {
-        message: 'A data de entrada na equipe deve ser válida.',
-      })
-      .min(1, 'A data de entrada na equipe é obrigatporia.'),
+    //   hiring_date: z.coerce
+    //     .date()
+    //     .refine((date) => !isNaN(date.getTime()), {
+    //       message: 'A data de entrada na equipe deve ser válida.',
+    //     })
+    //     .min(1, 'A data de entrada na equipe é obrigatporia.'),
 
-    position_id: z
-      .uuid({ message: 'O Id do cargo deve ser válido.' })
-      .min(1, 'O Id do cargo é obrigatório.'),
+    //   position_id: z
+    //     .uuid({ message: 'O Id do cargo deve ser válido.' })
+    //     .min(1, 'O Id do cargo é obrigatório.'),
 
-    cellphone: z.string().optional(),
-    birth_date: z.coerce
-      .date()
-      .refine((date) => !isNaN(date.getTime()), {
-        message: 'A data de nascimento deve ser válida.',
-      })
-      .optional(),
+    //   cellphone: z.string().optional(),
+    //   birth_date: z.coerce
+    //     .date()
+    //     .refine((date) => !isNaN(date.getTime()), {
+    //       message: 'A data de nascimento deve ser válida.',
+    //     })
+    //     .optional(),
 
-    department_id: z.uuid().optional(),
-    address: z.string().optional(),
-    supervisor_id: z.uuid().optional(),
+    //   department_id: z.uuid().optional(),
+    //   address: z.string().optional(),
+    //   supervisor_id: z.uuid().optional(),
   }),
 });
 
@@ -73,23 +73,23 @@ export const updateUserSchema = z.object({
       name: z.string().min(3).optional(),
       email: z.email().optional(),
       password: z.string().min(6).optional(),
-      hiring_date: z.coerce
-        .date()
-        .refine((date) => !isNaN(date.getTime()), {
-          message: 'A data de entrada na equipe deve ser válida.',
-        })
-        .optional(),
-      address: z.string().optional(),
-      position_id: z.uuid().optional(),
-      cellphone: z.string().optional(),
-      birth_date: z.coerce
-        .date()
-        .refine((date) => !isNaN(date.getTime()), {
-          message: 'A data de nascimento deve ser válida.',
-        })
-        .optional(),
-      department_id: z.uuid().optional(),
-      supervisor_id: z.uuid().optional(),
+      // hiring_date: z.coerce
+      //   .date()
+      //   .refine((date) => !isNaN(date.getTime()), {
+      //     message: 'A data de entrada na equipe deve ser válida.',
+      //   })
+      //   .optional(),
+      // address: z.string().optional(),
+      // position_id: z.uuid().optional(),
+      // cellphone: z.string().optional(),
+      // birth_date: z.coerce
+      //   .date()
+      //   .refine((date) => !isNaN(date.getTime()), {
+      //     message: 'A data de nascimento deve ser válida.',
+      //   })
+      //   .optional(),
+      // department_id: z.uuid().optional(),
+      // supervisor_id: z.uuid().optional(),
       is_active: z.boolean().optional(),
     })
     .refine(

@@ -1,9 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import { AuthService } from './auth.service.js';
 import { LoginDTO } from './auth.dtos.js';
-import { CreateUserDTO, SafeUserDTO } from '../user/user.dtos.js';
-
-const authService = new AuthService();
+import { SafeUserDTO } from '../user/user.dtos.js';
+import { registerSchema, RegisterFormData } from './auth.validation.js';
 
 const cookieOptions = {
   httpOnly: true,
@@ -14,6 +13,12 @@ const cookieOptions = {
 };
 
 export class AuthController {
+  private authService: AuthService;
+
+  constructor() {
+    this.authService = new AuthService();
+  }
+
   public async login(
     req: Request,
     res: Response,
@@ -22,7 +27,10 @@ export class AuthController {
     const { email, password }: LoginDTO = req.body;
 
     try {
-      const { token, safeUser } = await authService.login({ email, password });
+      const { token, safeUser } = await this.authService.login({
+        email,
+        password,
+      });
 
       res.cookie('token', token, { ...cookieOptions });
       res.status(200).json({ success: true, safeUser });
@@ -37,9 +45,10 @@ export class AuthController {
     next: NextFunction,
   ): Promise<void> {
     try {
-      const registerData: CreateUserDTO = req.body;
+      const registerData = req.body as RegisterFormData;
 
-      const newUser: SafeUserDTO = await authService.register(registerData);
+      const newUser = await this.authService.register(registerData);
+
       res.status(201).json({ success: true, data: newUser });
     } catch (error: unknown) {
       next(error);
@@ -54,7 +63,7 @@ export class AuthController {
     try {
       const { id } = req.params;
 
-      const user: SafeUserDTO = await authService.getMe(id);
+      const user: SafeUserDTO = await this.authService.getMe(id);
       res.status(200).json({ success: true, data: user });
     } catch (error: unknown) {
       next(error);
@@ -84,7 +93,7 @@ export class AuthController {
     try {
       const userId = req.user!.id;
 
-      const user: SafeUserDTO = await authService.getMe(userId);
+      const user: SafeUserDTO = await this.authService.getMe(userId);
       res.status(200).json({ success: true, data: user });
     } catch (error: unknown) {
       next(error);

@@ -1,46 +1,36 @@
+import z from 'zod';
+import { registerSchema } from '../auth/auth.validation.js';
 import { UserAttributes } from './user.js';
 
 /**
- * DTO to create project.
+ * DTO to create user.
  */
-export interface CreateUserDTO {
-  name: string;
-  email: string;
-  password: string;
-  hiring_date: Date;
-  position_id: string;
-  cellphone?: string;
-  birth_date?: Date;
-  address?: string;
-  department_id?: string;
-  supervisor_id?: string;
-  is_active: boolean;
-}
+export type CreateUserDTO = z.infer<typeof registerSchema>;
 
 /**
- * DTO to update project.
+ * DTO to update user.
  */
 export interface UpdateUserDTO {
   name?: string;
   email?: string;
   password?: string;
-  cellphone?: string;
-  birth_date?: Date;
-  address?: string;
-  department_id?: string;
-  position_id?: string;
-  supervisor_id?: string;
+  // cellphone?: string;
+  // birth_date?: Date;
+  // address?: string;
+  // department_id?: string;
+  // position_id?: string;
+  // supervisor_id?: string;
   is_active?: boolean;
 }
 
 /**
- * DTO to securely represent a project in the API response.
+ * DTO to securely represent a user in the API response.
  * Excludes password hash and virtual password.
  */
 export type SafeUserDTO = Omit<UserAttributes, 'password_hash' | 'password'>;
 
 /**
- * DTO to repesent the paged response of projects.
+ * DTO to repesent the paged response of users.
  */
 export interface PaginatedUsersDTO {
   totalItems: number;

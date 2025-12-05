@@ -1,14 +1,5 @@
 import { DataTypes, Model, Optional, Sequelize } from 'sequelize';
 import bcrypt from 'bcryptjs';
-import type { Position } from '../position/position.js';
-import type { Department } from '../department/department.js';
-import type { Role } from '../role/role.js';
-import type { UserRole } from '../userRole/userRole.js';
-import { Project } from '../project/project.js';
-import { Task } from '../task/task.js';
-import { HourLog } from '../hourLog/hourLog.js';
-import { Attachment } from '../attachment/attachment.js';
-import { UserTask } from '../userTask/userTask.js';
 
 interface UserAttributes {
   id: string; // UUID
@@ -16,40 +7,28 @@ interface UserAttributes {
   email: string;
   password?: string;
   password_hash: string;
-  cellphone?: string;
-  hiring_date: Date;
-  birth_date?: Date;
-  address?: string;
-  position_id: string; // FK Position (UUID)
-  department_id?: string; // FK Department (UUID)
-  supervisor_id?: string; // FK User (UUID)
-  is_active: boolean;
-}
+  phone?: string;
 
-type AssociationModels = {
-  User: typeof User;
-  Position: typeof Position;
-  Department: typeof Department;
-  Role: typeof Role;
-  UserRole: typeof UserRole;
-  Project: typeof Project;
-  Task: typeof Task;
-  HourLog: typeof HourLog;
-  Attachment: typeof Attachment;
-  UserTask: typeof UserTask;
-};
+  role: 'customer' | 'establishment' | 'deliveryman';
+
+  city?: string;
+  address?: string;
+
+  cpf?: string;
+  cnpj?: string;
+  birthdate?: Date | string;
+  university?: string;
+
+  is_active: boolean;
+
+  created_at?: Date;
+  updated_at?: Date;
+}
 
 interface UserCreationAttributes
   extends Optional<
     UserAttributes,
-    | 'id'
-    | 'password_hash'
-    | 'cellphone'
-    | 'birth_date'
-    | 'address'
-    | 'department_id'
-    | 'supervisor_id'
-    | 'is_active'
+    'id' | 'is_active' | 'created_at' | 'updated_at'
   > {
   password: string;
 }
@@ -63,32 +42,22 @@ class User
   declare email: string;
   declare password: string;
   declare password_hash: string;
-  declare cellphone?: string;
-  declare hiring_date: Date;
-  declare birth_date?: Date;
+  declare phone?: string;
+
+  declare role: 'customer' | 'establishment' | 'deliveryman';
+
+  declare city?: string;
   declare address?: string;
-  declare position_id: string;
-  declare department_id?: string;
-  declare supervisor_id?: string;
+
+  declare cpf?: string;
+  declare cnpj?: string;
+  declare birthdate?: Date | string;
+  declare university?: string;
+
   declare is_active: boolean;
 
   declare readonly created_at: Date;
   declare readonly updated_at: Date;
-
-  declare readonly position?: Position;
-  declare readonly department?: Department;
-  declare readonly supervisor?: User;
-  declare readonly subordinates?: User[];
-  declare readonly managedProjects?: Project[];
-  declare readonly createdTasks?: Task[];
-  declare readonly userTasks?: UserTask[];
-  declare readonly hourLogs?: HourLog[];
-  declare readonly approvedHourLogs?: HourLog[];
-  declare readonly createdAttachments?: Attachment[];
-  declare readonly profileAttachments?: Attachment[];
-  declare readonly roles?: Role[];
-  declare readonly userRoles?: UserRole[];
-  declare readonly managedDepartment?: Department;
 
   // Instance methods
   public async comparePassword(enteredPassword: string): Promise<boolean> {
@@ -124,45 +93,40 @@ class User
           type: DataTypes.STRING(255),
           allowNull: false,
         },
-        cellphone: {
+        phone: {
           type: DataTypes.STRING(20),
           allowNull: true,
         },
-        hiring_date: {
-          type: DataTypes.DATEONLY,
+        role: {
+          defaultValue: 'customer',
+          type: DataTypes.ENUM('customer', 'establishment', 'deliveryman'),
           allowNull: false,
         },
-        birth_date: {
-          type: DataTypes.DATEONLY,
+        city: {
+          type: DataTypes.STRING,
           allowNull: true,
         },
         address: {
-          type: DataTypes.STRING(255),
+          type: DataTypes.STRING,
           allowNull: true,
         },
-        position_id: {
-          type: DataTypes.UUID,
-          allowNull: false,
-          references: {
-            model: 'positions',
-            key: 'id',
-          },
-        },
-        department_id: {
-          type: DataTypes.UUID,
+        cpf: {
+          type: DataTypes.STRING(14),
           allowNull: true,
-          references: {
-            model: 'departments',
-            key: 'id',
-          },
+          unique: true,
         },
-        supervisor_id: {
-          type: DataTypes.UUID,
+        cnpj: {
+          type: DataTypes.STRING(18),
           allowNull: true,
-          references: {
-            model: 'users',
-            key: 'id',
-          },
+          unique: true,
+        },
+        birthdate: {
+          type: DataTypes.DATEONLY,
+          allowNull: true,
+        },
+        university: {
+          type: DataTypes.STRING(100),
+          allowNull: true,
         },
         is_active: {
           type: DataTypes.BOOLEAN,
@@ -184,81 +148,6 @@ class User
         },
       },
     );
-  }
-
-  // Association methods
-  static associate(models: AssociationModels) {
-    User.belongsTo(models.Position, {
-      foreignKey: 'position_id',
-      as: 'position',
-    });
-
-    User.belongsTo(models.Department, {
-      foreignKey: 'department_id',
-      as: 'department',
-    });
-
-    User.belongsTo(models.User, {
-      foreignKey: 'supervisor_id',
-      as: 'supervisor',
-    });
-
-    User.hasMany(models.User, {
-      foreignKey: 'supervisor_id',
-      as: 'subordinates',
-    });
-
-    User.hasMany(models.Project, {
-      foreignKey: 'manager_id',
-      as: 'managedProjects',
-    });
-
-    User.hasMany(models.Task, {
-      foreignKey: 'creator_id',
-      as: 'createdTasks',
-    });
-
-    User.hasMany(models.UserTask, {
-      foreignKey: 'user_id',
-      as: 'userTasks',
-    });
-
-    User.hasMany(models.HourLog, {
-      foreignKey: 'user_id',
-      as: 'hourLogs',
-    });
-
-    User.hasMany(models.HourLog, {
-      foreignKey: 'approver_id',
-      as: 'approvedHourLogs',
-    });
-
-    User.hasMany(models.Attachment, {
-      foreignKey: 'creator_id',
-      as: 'createdAttachments',
-    });
-
-    User.hasMany(models.Attachment, {
-      foreignKey: 'user_profile_id',
-      as: 'profileAttachments',
-    });
-
-    User.belongsToMany(models.Role, {
-      through: models.UserRole,
-      foreignKey: 'user_id',
-      otherKey: 'role_id',
-      as: 'roles',
-    });
-
-    User.hasMany(models.UserRole, {
-      foreignKey: 'user_id',
-      as: 'userRoles',
-    });
-
-    User.hasOne(models.Department, {
-      foreignKey: 'manager_id',
-      as: 'managedDepartment',
-    });
   }
 }
 
