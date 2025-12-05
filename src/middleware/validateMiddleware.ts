@@ -6,6 +6,8 @@ export const validate =
   (schema: z.Schema) =>
   async (req: Request, res: Response, next: NextFunction) => {
     try {
+      console.log('Recebido no body:', JSON.stringify(req.body, null, 2));
+
       await schema.parseAsync({
         body: req.body,
         params: req.params,
@@ -14,6 +16,7 @@ export const validate =
 
       return next();
     } catch (error) {
+      console.log(JSON.stringify(error, null, 2));
       if (error instanceof ZodError) {
         const flattenedErrors = treeifyError(error);
 

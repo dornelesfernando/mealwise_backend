@@ -4,12 +4,15 @@ import { User } from '../user/user.js';
 import jwt from 'jsonwebtoken';
 import { CreateUserDTO, SafeUserDTO } from '../user/user.dtos.js';
 import { LoginDTO } from './auth.dtos.js';
-import { sequelize } from '../../models/index.js';
-import { Position } from '../position/position.js';
-import { Department } from '../department/department.js';
-import { hashPassword } from '../../hooks/crypto.js';
+import { UserService } from '../user/user.service.js';
 
 export class AuthService {
+  private userService: UserService;
+
+  constructor() {
+    this.userService = new UserService();
+  }
+
   public async login(
     loginData: LoginDTO,
   ): Promise<{ token: string; safeUser: SafeUserDTO }> {
@@ -46,7 +49,6 @@ export class AuthService {
       const tokenPayload = {
         id: user.id,
         email: user.email,
-        role: user.roles,
       };
 
       const token = jwt.sign(tokenPayload, secret, { expiresIn: '1d' });
@@ -73,66 +75,9 @@ export class AuthService {
 
   public async register(registerData: CreateUserDTO): Promise<SafeUserDTO> {
     try {
-      const { position_id, department_id, supervisor_id } = registerData;
-      const { password, ...rest } = registerData;
+      const newUser = await this.userService.create(registerData);
 
-      const newUser = await sequelize.transaction(async (t) => {
-        const existingUser = await User.findOne({
-          where: { email: registerData.email },
-          transaction: t,
-        });
-
-        if (existingUser) {
-          throw new AppError(
-            'Já existe um usuário cadastrado com este e-mail.',
-            409,
-          );
-        }
-
-        const positionExists = await Position.findByPk(position_id);
-
-        if (!positionExists) {
-          throw new AppError('Posição não encontrada.', 404);
-        }
-
-        if (department_id) {
-          const departmentExists = await Department.findByPk(department_id);
-
-          if (!departmentExists) {
-            throw new AppError('Departamento não encontrado.', 404);
-          }
-        }
-
-        if (supervisor_id) {
-          const supervisorExists = await User.findByPk(supervisor_id);
-
-          if (!supervisorExists) {
-            throw new AppError('Supervisor não encontrado.', 404);
-          }
-        }
-
-        const hashedPassword = await hashPassword(password);
-
-        const user = await User.create(
-          {
-            ...rest,
-            password_hash: hashedPassword,
-            password: '',
-          },
-          {
-            transaction: t,
-          },
-        );
-
-        return user;
-      });
-
-      const {
-        password_hash: _unused_hash,
-        password: _unused_pass,
-        ...safeUser
-      } = newUser.toJSON();
-      return safeUser as SafeUserDTO;
+      return newUser as SafeUserDTO;
     } catch (error) {
       if (error instanceof AppError) {
         throw error;

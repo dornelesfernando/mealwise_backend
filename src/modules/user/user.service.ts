@@ -10,8 +10,6 @@ import { sequelize } from '../../models/index.js';
 
 import bcrypt from 'bcryptjs';
 import { hashPassword } from '../../hooks/crypto.js';
-import { Position } from '../position/position.js';
-import { Department } from '../department/department.js';
 
 type UpdatePayload = UpdateUserDTO & {
   password_hash?: string;
@@ -28,7 +26,6 @@ export class UserService {
    */
   public async create(userData: CreateUserDTO): Promise<SafeUserDTO> {
     try {
-      const { position_id, department_id, supervisor_id } = userData;
       const { password, ...rest } = userData;
 
       const newUser = await sequelize.transaction(async (t) => {
@@ -42,28 +39,6 @@ export class UserService {
             'Já existe um usuário cadastrado com este e-mail.',
             409,
           );
-        }
-
-        const positionExists = await Position.findByPk(position_id);
-
-        if (!positionExists) {
-          throw new AppError('Posição não encontrada.', 404);
-        }
-
-        if (department_id) {
-          const departmentExists = await Department.findByPk(department_id);
-
-          if (!departmentExists) {
-            throw new AppError('Departamento não encontrado.', 404);
-          }
-        }
-
-        if (supervisor_id) {
-          const supervisorExists = await User.findByPk(supervisor_id);
-
-          if (!supervisorExists) {
-            throw new AppError('Supervisor não encontrado.', 404);
-          }
         }
 
         const hashedPassword = await hashPassword(password);
@@ -114,11 +89,6 @@ export class UserService {
         attributes: {
           exclude: ['password_hash', 'password'],
         },
-        include: [
-          { association: 'position' },
-          { association: 'department' },
-          { association: 'supervisor', attributes: ['id', 'name', 'email'] },
-        ],
       });
 
       if (!user) {
@@ -161,7 +131,6 @@ export class UserService {
           exclude: ['password_hash'],
         },
         order: [['name', 'ASC']],
-        include: [{ association: 'position' }, { association: 'department' }],
       });
 
       return {
@@ -197,7 +166,6 @@ export class UserService {
     userData: UpdateUserDTO,
   ): Promise<SafeUserDTO> {
     try {
-      const { position_id, department_id, supervisor_id } = userData;
       const userToUpdate = await User.findByPk(id);
 
       if (!userToUpdate) {
@@ -217,30 +185,6 @@ export class UserService {
         }
       }
 
-      if (position_id) {
-        const positionExists = await Position.findByPk(position_id);
-
-        if (!positionExists) {
-          throw new AppError('Posição não encontrada.', 404);
-        }
-      }
-
-      if (department_id) {
-        const departmentExists = await Position.findByPk(department_id);
-
-        if (!departmentExists) {
-          throw new AppError('Departamento não encontrado.', 404);
-        }
-      }
-
-      if (supervisor_id) {
-        const supervisorExists = await Position.findByPk(supervisor_id);
-
-        if (!supervisorExists) {
-          throw new AppError('Supervisor não encontrado.', 404);
-        }
-      }
-
       const updateData: UpdatePayload = { ...userData };
 
       if (userData.password) {
@@ -255,11 +199,6 @@ export class UserService {
         attributes: {
           exclude: ['password_hash', 'password'],
         },
-        include: [
-          { association: 'position' },
-          { association: 'department' },
-          { association: 'supervisor', attributes: ['id', 'name', 'email'] },
-        ],
       });
 
       if (!updatedUser) {

@@ -3,4 +3,4 @@ version: '3.8'
 services:
   backend:
     ports:
-      - '${BACKEND_PORT}:5000'
+      - '${BACKEND_PORT}:${BACKEND_PORT}'

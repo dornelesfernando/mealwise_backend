@@ -208,8 +208,8 @@ sudo usermod -aG docker $USER
 docker run hello-world
 `
 
-                                                                            > [!NOTE]
-                                                                            > Atenção: Você deverá ver uma mensagem de boas-vindas do Docker.
+                                                                                                    > [!NOTE]
+                                                                                                    > Atenção: Você deverá ver uma mensagem de boas-vindas do Docker.
 
 7.  Após a instalação, abra o Docker Desktop, vá em **Settings > Resources > WSL Integration** e ative a integração para a sua distribuição (ex: Ubuntu).
 
